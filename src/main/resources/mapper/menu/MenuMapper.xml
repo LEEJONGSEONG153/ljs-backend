@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ljs.ljsbackend.common.menu.mapper.MenuMapper">
+
+    <select id="getList" resultType="com.ljs.ljsbackend.dto.MenuDto">
+        with recursive menu_list as (
+            -- 최상위 부모 정의
+            select menu_cd
+                 , menu_nm
+                 , menu_level
+                 , menu_path
+                 , remark
+                 , is_use
+                 , parent_menu_cd
+                 , menu_cd as path
+                 , insert_id
+                 , insert_date
+                 , update_id
+                 , update_date
+              from menu
+             where menu_id = 'A0'
+               and parent_menu_cd is null
+
+            union all
+
+            -- 단계별 부모와 자식 매핑
+            select a.menu_cd
+                 , a.menu_nm
+                 , a.menu_level
+                 , a.menu_path
+                 , a.remark
+                 , a.is_use
+                 , a.parent_menu_cd
+                 , concat( menu_list.path, ' > ', a.menu_cd) as path
+                 , a.insert_id
+                 , a.insert_date
+                 , a.update_id
+                 , a.update_date
+              from menu_list
+              join menu a on a.parent_menu_cd  = menu_list.menu_cd
+        )
+        select * from menu_list;
+
+    </select>
+</mapper>
