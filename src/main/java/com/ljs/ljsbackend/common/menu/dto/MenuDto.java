@@ -1,4 +1,4 @@
-package com.ljs.ljsbackend.dto;
+package com.ljs.ljsbackend.common.menu.dto;
 
 import lombok.Data;
 

@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.ljs.ljsbackend.common.menu.mapper.MenuMapper">
+<mapper namespace="com.ljs.ljsbackend.common.login.mapper.LoginMapper">
 
-    <select id="getList" resultType="MenuDto">
+    <select id="getUser" parameterType="UserDto" resultType="UserDto">
+        select *
+          from user
+         where user_id = #{userId}
+    </select>
+
+    <select id="getList" resultType="UserDto">
         with recursive menu_list as (
             -- 최상위 부모 정의
             select menu_cd

@@ -21,12 +21,12 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class MenuController {
 
-    private final MenuService menuService;
+    private final MenuService service;
 
     @PostMapping("/api/v1/menu/list")
     public ResponseEntity<Object> testApi() {
 
-        List<Map<String, Object>> list = menuService.getList();
+        List<Map<String, Object>> list = service.getList();
         return new ResponseEntity(DefaultRes.res(StatusCode.OK, ResponseMessage.CONNECT_SUCCESS, list), HttpStatus.OK);
     }
 }

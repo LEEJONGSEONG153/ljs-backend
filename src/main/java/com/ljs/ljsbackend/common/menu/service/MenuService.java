@@ -12,11 +12,11 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class MenuService {
 
-    private final MenuMapper menuMapper;
+    private final MenuMapper mapper;
 
     public List<Map<String, Object>> getList () {
 
-        List<Map<String, Object>> list = menuMapper.getList();
+        List<Map<String, Object>> list = mapper.getList();
         return list;
     }
 
