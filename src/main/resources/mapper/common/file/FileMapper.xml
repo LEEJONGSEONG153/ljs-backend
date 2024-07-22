@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ljs.ljsbackend.common.file.mapper.FileMapper">
+
+    <insert id="save" parameterType="Map">
+
+        INSERT INTO file
+                    (
+
+                     file_seq
+                    , file_nm
+                    , file_path
+                    , attr_1
+                    , attr_2
+                    , is_del
+                    , insert_id
+                    , insert_date
+                    , update_id
+                    , update_date
+                    )
+        VALUES(
+          #{FILE_SEQ}
+        , #{FILE_NM}
+        , #{FILE_PATH}
+        , NULL
+        , NULL
+        , NULL
+        , NULL
+        , sysdate()
+        , NULL
+        , sysdate());
+    </insert>
+
+    <select id="getList" resultType="FileDto">
+        select * from file;
+    </select>
+
+</mapper>

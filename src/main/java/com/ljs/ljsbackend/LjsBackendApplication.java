@@ -18,7 +18,7 @@ public class LjsBackendApplication {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**").allowedOrigins("http://58.148.100.28","http://localhost:5000");
+                registry.addMapping("/**").allowedOrigins("http://58.148.100.28","http://localhost:5000","http://127.0.0.1:5000");
             }
         };
     }
