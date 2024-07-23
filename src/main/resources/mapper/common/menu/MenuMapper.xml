@@ -40,7 +40,19 @@
               from menu_list
               join menu a on a.parent_menu_cd  = menu_list.menu_cd
         )
-        select * from menu_list;
+        select menu_cd
+             , menu_nm
+             , menu_level
+             , menu_path
+             , remark
+             , case is_use when 'Y' then 'true'
+                           else 'false' end as is_use
+             , parent_menu_cd
+             , path
+             , insert_id
+             , insert_date
+             , update_id
+             , update_date from menu_list;
 
     </select>
 </mapper>

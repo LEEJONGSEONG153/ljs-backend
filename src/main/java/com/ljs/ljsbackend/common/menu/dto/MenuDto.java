@@ -11,7 +11,7 @@ public class MenuDto {
     private String MenuPath;
     private String ParentMenuCd;
     private String remark;
-    private String isUse;
+    private Boolean isUse;
     private String insertId;
     private String insertDate;
     private String updateId;
