@@ -18,8 +18,8 @@ public class FileService {
         mapper.save(map);
     }
 
-    public List<FileDto> getList() {
-        return mapper.getList();
+    public List<FileDto> getList(Map<String,Object> paramMap) {
+        return mapper.getList(paramMap);
 
     }
 }

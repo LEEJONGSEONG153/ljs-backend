@@ -7,10 +7,13 @@
 
         INSERT INTO file
                     (
-
                      file_seq
                     , file_nm
+                    , file_org_nm
+                    , file_type
+                    , file_size
                     , file_path
+                    , file_create_dt
                     , attr_1
                     , attr_2
                     , is_del
@@ -22,7 +25,11 @@
         VALUES(
           #{FILE_SEQ}
         , #{FILE_NM}
+        , #{FILE_ORG_NM}
+        , #{FILE_TYPE}
+        , #{FILE_SIZE}
         , #{FILE_PATH}
+        , #{FILE_CREATE_DT}
         , NULL
         , NULL
         , NULL
@@ -32,8 +39,9 @@
         , sysdate());
     </insert>
 
-    <select id="getList" resultType="FileDto">
-        select * from file;
+    <select id="getList" resultType="FileDto" parameterType="HashMap">
+        select * from file
+        where file_path like concat('%',#{galleryType},'%')
     </select>
 
 </mapper>

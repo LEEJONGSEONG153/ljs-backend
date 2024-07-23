@@ -13,7 +13,7 @@ public class MenuDto {
     private String remark;
     private String isUse;
     private String insertId;
-    private String isnertDate;
-    private String udpateId;
-    private String udpateDate;
+    private String insertDate;
+    private String updateId;
+    private String updateDate;
 }

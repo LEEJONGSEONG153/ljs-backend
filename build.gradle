@@ -33,6 +33,9 @@ dependencies {
     //MyBatis
     implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
     implementation 'com.jcraft:jsch:0.1.55'
+    //파일
+//    implementation 'commons-io:commons-io:2.11.0'
+
 
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'

@@ -11,5 +11,5 @@ public interface FileMapper {
 
     void save(Map<String, Object> map);
 
-    List<FileDto> getList();
+    List<FileDto> getList(Map<String,Object> mpa);
 }

@@ -8,7 +8,7 @@ public class UserDto {
     private String userNM;
     private String userPhone;
     private String insertId;
-    private String isnertDate;
-    private String udpateId;
-    private String udpateDate;
+    private String insertDate;
+    private String updateId;
+    private String updateDate;
 }
