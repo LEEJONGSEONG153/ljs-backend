@@ -7,9 +7,11 @@ import java.util.Map;
 
 @Mapper
 public interface MenuMapper {
-    List<Map<String,Object>> getList();
+    List<Map<String,Object>> getMenuList();
 
-    void update(Map<String, Object> menu);
+    void updateMenu(Map<String, Object> menu);
 
-    void insert(Map<String, Object> menu);
+    void insertMenu(Map<String, Object> menu);
+
+    void deleteMenu(Map<String, Object> mapParam);
 }

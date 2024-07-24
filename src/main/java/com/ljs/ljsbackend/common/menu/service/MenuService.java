@@ -14,16 +14,20 @@ public class MenuService {
 
     private final MenuMapper mapper;
 
-    public List<Map<String, Object>> getList () {
-        return mapper.getList();
+    public List<Map<String, Object>> getMenuList () {
+        return mapper.getMenuList();
     }
 
 
-    public void update(Map<String, Object> menu) {
-        mapper.update(menu);
+    public void updateMenu(Map<String, Object> menu) {
+        mapper.updateMenu(menu);
     }
 
-    public void insert(Map<String, Object> menu) {
-        mapper.insert(menu);
+    public void insertMenu(Map<String, Object> menu) {
+        mapper.insertMenu(menu);
+    }
+
+    public void deleteMenu(Map<String, Object> mapParam) {
+        mapper.deleteMenu(mapParam);
     }
 }

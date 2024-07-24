@@ -3,7 +3,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ljs.ljsbackend.common.menu.mapper.MenuMapper">
 
-    <select id="getList" resultType="MenuDto">
+    <select id="getMenuList" resultType="MenuDto">
         with recursive menu_list as (
             -- 최상위 부모 정의
             select menu_id
@@ -20,7 +20,7 @@
                  , update_id
                  , update_date
               from menu
-             where menu_id = 'A' and parent_menu_cd is null
+             where parent_menu_cd is null
                and parent_menu_cd is null
 
             union all
@@ -59,7 +59,7 @@
 
     </select>
 
-    <update id="update" parameterType="HashMap">
+    <update id="updateMenu" parameterType="HashMap">
         update menu
            set menu_cd=#{menuCd}
              , menu_nm=#{menuNm}
@@ -72,7 +72,7 @@
 
     </update>
 
-    <insert id="insert">
+    <insert id="insertMenu">
         INSERT INTO menu
                     ( menu_id
                     , menu_cd
@@ -92,7 +92,7 @@
                     , #{menuNm}
                     , #{menuLevel}
                     , #{menuPath}
-                    , #{menuMenuCd}
+                    , #{parentMenuCd}
                     , #{remark}
                     , true
                     , #{insertId}
@@ -104,10 +104,16 @@
                           menu_nm=#{menuNm}
                         , menu_level=#{menuLevel}
                         , menu_path=#{menuPath}
-                        , parent_menu_cd=#{menuParentCd}
+                        , parent_menu_cd=#{parentMenuCd}
                         , remark=#{remark}
                         , is_use=#{isUse}
                         , update_id=#{insertId}
                         , update_date=sysdate()
     </insert>
+
+    <delete id="deleteMenu">
+        delete from menu
+         where menu_cd = #{menuCd}
+
+    </delete>
 </mapper>

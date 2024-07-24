@@ -36,7 +36,7 @@ public class LoginController {
         if(userInfo != null) {
             //todo 로그인 성공시 메뉴 리스트 조회
             Map<String,Object> map = new HashMap<>();
-            List<Map<String, Object>> menuList = menuService.getList();
+            List<Map<String, Object>> menuList = menuService.getMenuList();
             map.put("userInfo",userInfo);
             map.put("menuList",menuList);
 
