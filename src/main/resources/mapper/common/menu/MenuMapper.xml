@@ -6,7 +6,8 @@
     <select id="getList" resultType="MenuDto">
         with recursive menu_list as (
             -- 최상위 부모 정의
-            select menu_cd
+            select menu_id
+                 , menu_cd
                  , menu_nm
                  , menu_level
                  , menu_path
@@ -19,13 +20,14 @@
                  , update_id
                  , update_date
               from menu
-             where menu_id = 'A0'
+             where menu_id = 'A' and parent_menu_cd is null
                and parent_menu_cd is null
 
             union all
 
             -- 단계별 부모와 자식 매핑
-            select a.menu_cd
+            select a.menu_id
+                 , a.menu_cd
                  , a.menu_nm
                  , a.menu_level
                  , a.menu_path
@@ -40,7 +42,8 @@
               from menu_list
               join menu a on a.parent_menu_cd  = menu_list.menu_cd
         )
-        select menu_cd
+        select menu_id
+             , menu_cd
              , menu_nm
              , menu_level
              , menu_path
@@ -55,4 +58,56 @@
              , update_date from menu_list;
 
     </select>
+
+    <update id="update" parameterType="HashMap">
+        update menu
+           set menu_cd=#{menuCd}
+             , menu_nm=#{menuNm}
+             , menu_path=#{menuPath}
+             , is_use=#{isUse}
+             , update_id=#{insertId}
+             , update_date=sysdate()
+         where menu_id=#{menuId}
+           and menu_cd=#{menuCd}
+
+    </update>
+
+    <insert id="insert">
+        INSERT INTO menu
+                    ( menu_id
+                    , menu_cd
+                    , menu_nm
+                    , menu_level
+                    , menu_path
+                    , parent_menu_cd
+                    , remark
+                    , is_use
+                    , insert_id
+                    , insert_date
+                    , update_id
+                    , update_date
+                    )
+        VALUES      ( #{menuId}
+                    , #{menuCd}
+                    , #{menuNm}
+                    , #{menuLevel}
+                    , #{menuPath}
+                    , #{menuMenuCd}
+                    , #{remark}
+                    , true
+                    , #{insertId}
+                    , sysdate()
+                    , #{insertId}
+                    , sysdate()
+                    )
+            ON DUPLICATE KEY UPDATE
+                          menu_nm=#{menuNm}
+                        , menu_level=#{menuLevel}
+                        , menu_path=#{menuPath}
+                        , parent_menu_cd=#{menuParentCd}
+                        , remark=#{remark}
+                        , is_use=#{isUse}
+                        , update_id=#{insertId}
+                        , update_date=sysdate()
+    </insert>
 </mapper>

@@ -15,10 +15,15 @@ public class MenuService {
     private final MenuMapper mapper;
 
     public List<Map<String, Object>> getList () {
-
-        List<Map<String, Object>> list = mapper.getList();
-        return list;
+        return mapper.getList();
     }
 
 
+    public void update(Map<String, Object> menu) {
+        mapper.update(menu);
+    }
+
+    public void insert(Map<String, Object> menu) {
+        mapper.insert(menu);
+    }
 }
