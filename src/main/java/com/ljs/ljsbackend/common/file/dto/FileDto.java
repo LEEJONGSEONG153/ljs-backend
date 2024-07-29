@@ -11,6 +11,8 @@ public class FileDto {
     private String fileType;
     private String fileSize;
     private String filePath;
+    private String fileCreateDt;
+    private String ljsDays;
     private String attr1;
     private String attr2;
     private String insertId;
