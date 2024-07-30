@@ -40,29 +40,37 @@
     </insert>
 
     <select id="getList" resultType="FileDto" parameterType="HashMap">
-        select file_key
-             , file_id
-             , file_seq
-             , file_nm
-             , file_org_nm
-             , file_type
-             , file_size
-             , file_path
-             , file_create_dt
-             , datediff( file_create_dt,'20240328')+1 as ljs_days
-             , attr_1
-             , attr_2
-             , is_del
-             , insert_id
-             , insert_date
-             , update_id
-             , update_date
-         from  file
-        where  file_path like concat('%',#{galleryType},'%')
-        <if test="galleryType.equals('image')">
-          and  file_seq = '1'
+        select a.* from (
+            select file_key
+                 , file_id
+                 , file_seq
+                 , file_nm
+                 , file_org_nm
+                 , file_type
+                 , file_size
+                 , file_path
+                 , file_create_dt
+                 , datediff( file_create_dt,'20240328')+1 as ljs_days
+                 , attr_1
+                 , attr_2
+                 , is_del
+                 , insert_id
+                 , insert_date
+                 , update_id
+                 , update_date
+             from  file
+            where  file_path like concat('%',#{galleryType},'%')
+            <if test="galleryType.equals('image')">
+              and  file_seq = '1'
+            </if>
+            ) a
+        where 1=1
+        <if test="start != null and end != null">
+        and ljs_days between #{start} and #{end}
+
         </if>
         order  by ljs_days
+
     </select>
 
 </mapper>
