@@ -59,6 +59,9 @@
              , update_date
          from  file
         where  file_path like concat('%',#{galleryType},'%')
+        <if test="galleryType.equals('image')">
+          and  file_seq = '1'
+        </if>
         order  by ljs_days
     </select>
 
