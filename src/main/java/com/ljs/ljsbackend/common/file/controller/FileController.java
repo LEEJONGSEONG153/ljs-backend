@@ -3,11 +3,16 @@ package com.ljs.ljsbackend.common.file.controller;
 import com.jcraft.jsch.*;
 import com.ljs.ljsbackend.common.file.dto.FileDto;
 import com.ljs.ljsbackend.common.file.service.FileService;
+import com.ljs.ljsbackend.response.DefaultRes;
+import com.ljs.ljsbackend.response.ResponseMessage;
+import com.ljs.ljsbackend.response.StatusCode;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.imgscalr.Scalr;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -37,87 +42,101 @@ public class FileController {
 
 
     @RequestMapping("/api/v1/fileUpload")
-    public String fileUpload(@RequestParam MultipartFile uploadFile,@RequestParam String createDate, HttpSession session2) {
+    public ResponseEntity<Object> fileUpload(
+                             @RequestParam(value="uploadFiles") List<MultipartFile> uploadFiles
+                            ,@RequestParam(value="createDates") List<String> createDates
+                            ) {
 
         try {
-            //저장 base 위치
-            String des = "/home/lee/jongPjr/html";
-            String des2 = "/home/lee/jongPjr/html";
+            MultipartFile uploadFile;
+            String createDate;
 
-            //1.데이터추출
-            String fileCreateDt = createDate;
-            String fileSize     = String.valueOf(uploadFile.getSize());
-            String fileType     = uploadFile.getContentType();
-            String fileNm       = uploadFile.getOriginalFilename();
-            String extension    = fileNm.substring(fileNm.lastIndexOf(".")+1, fileNm.length()).toLowerCase();
-            UUID uuid = UUID.randomUUID();
-            String newFileName = uuid + "." + extension;
-            UUID uuid2 = UUID.randomUUID();
-            String newFileName2 = uuid2 + "." + extension;
+            for(int i=0; i<uploadFiles.size(); i++) {
+                uploadFile = uploadFiles.get(i);
+                createDate = createDates.get(i);
 
-            String path = "";
-            // 포맷 정의
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-            // 포맷 적용
-            String formatedNow = LocalDate.now().format(formatter);
-            if(extension.equals("mp4") || extension.equals("mov")) {
-                path = "/file/movies/";
-            } else {
-                path = "/file/images/";
-            }
-            path += formatedNow;
-            des+=path;
-            Map<String,Object> map = new HashMap<>();
-            map.put("FILE_NM", newFileName);
-            map.put("FILE_ORG_NM", fileNm);
-            map.put("FILE_SEQ", 0);
-            map.put("FILE_PATH", path);
-            map.put("FILE_TYPE", fileType);
-            map.put("FILE_SIZE", fileSize);
-            map.put("FILE_CREATE_DT", fileCreateDt);
+                //저장 base 위치
+                String des = "/home/lee/jongPjr/html";
+                String des2 = "/home/lee/jongPjr/html";
 
-            //2.확장자 체크
-            if(!checkExtension(extension)){
-                return null;
-            };
+                //1.데이터추출
+                String fileCreateDt = createDate;
+                String fileSize = String.valueOf(uploadFile.getSize());
+                String fileType = uploadFile.getContentType();
+                String fileNm = uploadFile.getOriginalFilename();
+                String extension = fileNm.substring(fileNm.lastIndexOf(".") + 1, fileNm.length()).toLowerCase();
+                UUID uuid = UUID.randomUUID();
+                String newFileName = uuid + "." + extension;
+                UUID uuid2 = UUID.randomUUID();
+                String newFileName2 = uuid2 + "." + extension;
 
-            //3.db 저장
-            fileService.save(map);
-
-            //5.실제 서버에 저장
-            saveFileToServer(uploadFile,des,newFileName);
-
-            //6.이미지 리사이즈
-            InputStream inputStream = checkImageSize(uploadFile, extension);
-
-            if(extension.equals("mp4") || extension.equals("mov")) {
-                return null;
-            } else {
-                path = "/file/imagesThumbnail/";
-
+                String path = "";
+                // 포맷 정의
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+                // 포맷 적용
+                String formatedNow = LocalDate.now().format(formatter);
+                if (extension.equals("mp4") || extension.equals("mov")) {
+                    path = "/file/movies/";
+                } else {
+                    path = "/file/images/";
+                }
                 path += formatedNow;
-                des2 += path;
-
-                //3.db 저장
-                map.put("FILE_NM", newFileName2);
+                des += path;
+                Map<String, Object> map = new HashMap<>();
+                map.put("FILE_NM", newFileName);
                 map.put("FILE_ORG_NM", fileNm);
-                map.put("FILE_SEQ", 1);
+                map.put("FILE_SEQ", 0);
                 map.put("FILE_PATH", path);
                 map.put("FILE_TYPE", fileType);
                 map.put("FILE_SIZE", fileSize);
                 map.put("FILE_CREATE_DT", fileCreateDt);
-                //db 저장
-                fileService.save(map);
-                //실제 서버에 저장
-                saveFileToServer(inputStream,des2,newFileName2);
-            }
 
-            System.out.println("업로드 성공 하였습니다.");
+                //2.확장자 체크
+                if (!checkExtension(extension)) {
+                    return null;
+                }
+                ;
+
+                //3.db 저장
+                fileService.save(map);
+
+                //5.실제 서버에 저장
+                saveFileToServer(uploadFile,des,newFileName);
+
+                //6.이미지 리사이즈
+                InputStream inputStream = checkImageSize(uploadFile, extension);
+
+                if (extension.equals("mp4") || extension.equals("mov")) {
+                    return null;
+                } else {
+                    path = "/file/imagesThumbnail/";
+
+                    path += formatedNow;
+                    des2 += path;
+
+                    //3.db 저장
+                    map.put("FILE_NM", newFileName2);
+                    map.put("FILE_ORG_NM", fileNm);
+                    map.put("FILE_SEQ", 1);
+                    map.put("FILE_PATH", path);
+                    map.put("FILE_TYPE", fileType);
+                    map.put("FILE_SIZE", fileSize);
+                    map.put("FILE_CREATE_DT", fileCreateDt);
+                    //db 저장
+                    fileService.save(map);
+                    //실제 서버에 저장
+                    saveFileToServer(inputStream,des2,newFileName2);
+                }
+
+                System.out.println("업로드 성공 하였습니다.");
+            }
+            return new ResponseEntity(DefaultRes.res(StatusCode.OK, ResponseMessage.CONNECT_SUCCESS, null), HttpStatus.OK);
         } catch(Exception e) {
             log.error("Exception:",e);
         } finally {
             return null;
         }
+
     }
 
     private <T> void saveFileToServer(T file, String des, String newFileName) throws Exception {
