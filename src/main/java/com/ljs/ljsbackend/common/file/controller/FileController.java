@@ -40,6 +40,9 @@ public class FileController {
     @Value("${ssh.password}")
     private String password;
 
+    @Value("${ssh.id}")
+    private String id;
+
 
     @RequestMapping("/api/v1/fileUpload")
     public ResponseEntity<Object> fileUpload(
@@ -143,7 +146,7 @@ public class FileController {
         JSch jsch = new JSch();
 
         //user, ip, port
-        Session session = jsch.getSession("lee", "58.148.100.28", 22092);
+        Session session = jsch.getSession(id, "58.148.100.28", 22092);
         session.setConfig("StrictHostKeyChecking", "no");
 
         //이동시킬 서버의 password
