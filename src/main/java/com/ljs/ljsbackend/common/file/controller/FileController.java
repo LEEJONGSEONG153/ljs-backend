@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.imgscalr.Scalr;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,10 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -53,6 +51,7 @@ public class FileController {
         try {
             MultipartFile uploadFile;
             String createDate;
+            Boolean isHeicFile = false;
 
             for(int i=0; i<uploadFiles.size(); i++) {
                 uploadFile = uploadFiles.get(i);
@@ -68,6 +67,10 @@ public class FileController {
                 String fileType = uploadFile.getContentType();
                 String fileNm = uploadFile.getOriginalFilename();
                 String extension = fileNm.substring(fileNm.lastIndexOf(".") + 1, fileNm.length()).toLowerCase();
+                if(extension.equals("heic")) {
+                    extension = "jpg";
+                    isHeicFile = true;
+                }
                 UUID uuid = UUID.randomUUID();
                 String newFileName = uuid + "." + extension;
                 UUID uuid2 = UUID.randomUUID();
@@ -98,16 +101,35 @@ public class FileController {
                 if (!checkExtension(extension)) {
                     return null;
                 }
-                ;
 
                 //3.db 저장
                 fileService.save(map);
 
-                //5.실제 서버에 저장
-                saveFileToServer(uploadFile,des,newFileName);
+                //4. heic형식의 image파일은 jpg로 변환후 저장
+                InputStream inputStream = null;
+                if(isHeicFile) {
 
-                //6.이미지 리사이즈
-                InputStream inputStream = checkImageSize(uploadFile, extension);
+                    isHeicFile = false;
+
+                    //2-2. heic -> jpg 변환
+                    InputStream convertInputStream =  convertHeicToJpg(uploadFile,createDate);
+
+                    //5.실제 서버에 저장
+                    saveFileToServer(convertInputStream,des,newFileName);
+
+                    System.out.println("convertInputStream = " + convertInputStream);
+
+                    //6.이미지 리사이즈
+                    inputStream = checkImageSize(convertInputStream, extension);
+
+                } else {
+                    //5.실제 서버에 저장
+                    saveFileToServer(uploadFile,des,newFileName);
+
+                    //6.이미지 리사이즈
+                    inputStream = checkImageSize(uploadFile, extension);
+
+                }
 
                 if (extension.equals("mp4") || extension.equals("mov")) {
                     return null;
@@ -140,6 +162,31 @@ public class FileController {
             return null;
         }
 
+    }
+
+    private InputStream convertHeicToJpg(MultipartFile uploadFile, String createDate) throws IOException, InterruptedException {
+
+        File inputFile = File.createTempFile("input", ".heic");
+        File outputFile = File.createTempFile("output", ".jpg");
+        uploadFile.transferTo(inputFile);
+
+        ProcessBuilder processBuilder = new ProcessBuilder("magick", "convert", inputFile.getAbsolutePath(), outputFile.getAbsolutePath());
+        Process process = processBuilder.start();
+        process.waitFor();
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (InputStream is = new FileInputStream(outputFile)) {
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = is.read(buffer)) != -1) {
+                baos.write(buffer, 0, length);
+            }
+        }
+        // Clean up temporary files
+        inputFile.delete();
+        outputFile.delete();
+
+        return new ByteArrayInputStream(baos.toByteArray());
     }
 
     private <T> void saveFileToServer(T file, String des, String newFileName) throws Exception {
@@ -181,7 +228,7 @@ public class FileController {
 
 
     private Boolean checkExtension(String extension) throws Exception {
-        String[] PERMISSION_FILE_EXT_ARR = {"GIF", "JPEG", "JPG", "PNG", "BMP", "MP4", "MOV"};
+        String[] PERMISSION_FILE_EXT_ARR = {"GIF", "JPEG", "JPG", "PNG", "BMP", "MP4", "MOV", "HEIC"};
         Boolean permission = false;
         for(int i=0; i<PERMISSION_FILE_EXT_ARR.length; i++) {
             if(extension.equals(PERMISSION_FILE_EXT_ARR[i].toLowerCase())){
@@ -190,21 +237,50 @@ public class FileController {
             }
         }
         if(!permission){
-            System.out.println("확장자 체크를 통과하지 못했습니다. 가능한 확장자 :GIF, JPEG, JPG, PNG, BMP, MP4");
+            System.out.println("확장자 체크를 통과하지 못했습니다. 가능한 확장자 :GIF, JPEG, JPG, PNG, BMP, MP4, HEIC");
             return false;
         }
         return true;
     }
 
-    private InputStream checkImageSize(MultipartFile file, String extension) {
+    private <T> InputStream checkImageSize(T file, String extension) {
         try {
-            BufferedImage bufferedImage = ImageIO.read(file.getInputStream());
+            if (extension.equals("mp4") || extension.equals("mov")) {
+                return null;
+            }
+            System.out.println("pass1");
+
+            BufferedImage bufferedImage = null;
+            InputStream inputStreamCopy = null;
+
+            if(file instanceof MultipartFile) {
+                System.out.println("pass1-1");
+//                bufferedImage = ImageIO.read(((MultipartFile) file).getInputStream());
+
+                System.out.println("pass1-1");
+                inputStreamCopy = new ByteArrayInputStream(((MultipartFile) file).getBytes());
+                bufferedImage = ImageIO.read(inputStreamCopy);
+
+            } else if(file instanceof InputStream) {
+                System.out.println("pass1-2");
+                System.out.println("file = " + file);
+                inputStreamCopy = new ByteArrayInputStream(((InputStream) file).readAllBytes());
+                bufferedImage = ImageIO.read(inputStreamCopy);
+                System.out.println("file >>>"+file);
+                System.out.println("(InputStream) file >>>"+ file);
+                System.out.println("bufferedImage >>>"+bufferedImage);
+            }
+
+
+
+
+            System.out.println("pass2");
 //            int width = bufferedImage.getWidth();
 //            int height = bufferedImage.getHeight();
 
             int targetWidth = 1200;  // 원하는 너비
             BufferedImage resizedImage = Scalr.resize(bufferedImage, targetWidth);
-
+            System.out.println("pass3");
             // 리사이즈된 BufferedImage를 InputStream으로 변환
             InputStream inputStream = bufferedImageToInputStream(resizedImage, extension);
             return inputStream;

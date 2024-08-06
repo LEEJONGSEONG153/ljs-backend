@@ -86,13 +86,13 @@ public class TestFileUploadController {
                 }
 
                 // Upload the converted image to the server using JSch
-                String result = uploadToServer(new ByteArrayInputStream(baos.toByteArray()), outputFile.getName());
+                uploadToServer(new ByteArrayInputStream(baos.toByteArray()), outputFile.getName(), i);
 
                 // Clean up temporary files
                 inputFile.delete();
                 outputFile.delete();
 
-                return result;
+
 
             }
 
@@ -103,7 +103,7 @@ public class TestFileUploadController {
         return null;
     }
 
-    private String uploadToServer(InputStream inputStream, String remoteFileName) {
+    private String uploadToServer(InputStream inputStream, String remoteFileName, int i) {
 
 
 
@@ -137,7 +137,7 @@ public class TestFileUploadController {
 
             sftpChannel.cd(des);
 
-            sftpChannel.put(inputStream, "newFile");
+            sftpChannel.put(inputStream, "newFile"+i+".jpg");
             sftpChannel.disconnect();
             channel.disconnect();
             session.disconnect();
