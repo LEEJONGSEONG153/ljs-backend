@@ -52,30 +52,14 @@ public class TestFileUploadController {
                 uploadFile.transferTo(inputFile);
 
                 // Prepare the command to run ImageMagick for conversion
-                ProcessBuilder processBuilder = new ProcessBuilder();
-                processBuilder.command("magick", "convert", inputFile.getAbsolutePath(), outputFile.getAbsolutePath());
-
+                ProcessBuilder processBuilder = new ProcessBuilder("magick", "convert", inputFile.getAbsolutePath(), outputFile.getAbsolutePath());
                 Process process = processBuilder.start();
+                process.waitFor();
 
-                StringBuilder output = new StringBuilder();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    output.append(line).append("\n");
+                if (process.exitValue() != 0) {
+                    throw new IOException("Image conversion failed");
                 }
 
-                int exitCode = process.waitFor();
-                if (exitCode != 0) {
-                    BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-                    StringBuilder errorOutput = new StringBuilder();
-                    while ((line = errorReader.readLine()) != null) {
-                        errorOutput.append(line).append("\n");
-                    }
-                    return "Error during image conversion: " + errorOutput.toString();
-                }
-
-                // Read the converted image file into a byte array
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 try (InputStream is = new FileInputStream(outputFile)) {
                     byte[] buffer = new byte[1024];
@@ -85,14 +69,12 @@ public class TestFileUploadController {
                     }
                 }
 
-                // Upload the converted image to the server using JSch
-                uploadToServer(new ByteArrayInputStream(baos.toByteArray()), outputFile.getName(), i);
-
-                // Clean up temporary files
                 inputFile.delete();
                 outputFile.delete();
 
+                InputStream jpgInputStream = new ByteArrayInputStream(baos.toByteArray());
 
+                uploadToServer(jpgInputStream,"newFIle"+i,i);
 
             }
 
@@ -142,6 +124,7 @@ public class TestFileUploadController {
             channel.disconnect();
             session.disconnect();
 
+            inputStream.close();
 
 
 
